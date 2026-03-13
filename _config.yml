@@ -1,0 +1,31 @@
+title: "Verifiable Aggregate Receipts"
+description: "Website for the paper Verifiable Aggregate Receipts with Applications to User Engagement Auditing."
+theme: beautiful-jekyll-theme
+
+url: ""
+baseurl: ""
+timezone: America/New_York
+
+navbar-links:
+  Paper:
+    - ePrint: "https://eprint.iacr.org/2025/2330"
+    - PDF: "https://eprint.iacr.org/2025/2330.pdf"
+
+author:
+  name: "Ioannis Kaklamanis, Wenhao Wang, Harjasleen Malvai, Fan Zhang"
+
+markdown: kramdown
+highlighter: rouge
+permalink: /:title/
+
+kramdown:
+  input: GFM
+
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+
+paginate: 5
+
+site-css:
+  - "/assets/css/custom.css"
