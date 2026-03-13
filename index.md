@@ -1,7 +1,7 @@
 ---
 layout: page
-title: "Verifiable Aggregate Receipts with Applications to User Engagement Auditing"
-subtitle: "Privacy-preserving and scalable auditing for user engagement"
+title: "Verifiable Aggregate Receipts (VAR)"
+subtitle: "with applications to privacy-preserving and scalable user engagement auditing"
 ---
 
 <div class="paper-meta">
@@ -20,88 +20,62 @@ subtitle: "Privacy-preserving and scalable auditing for user engagement"
   <div class="paper-links">
     <a class="btn btn-primary paper-link-btn" href="https://eprint.iacr.org/2025/2330">ePrint</a>
     <a class="btn btn-primary paper-link-btn" href="https://eprint.iacr.org/2025/2330.pdf">PDF</a>
-    <span class="btn btn-default paper-link-btn disabled" aria-disabled="true">Code coming soon</span>
-    <span class="btn btn-default paper-link-btn disabled" aria-disabled="true">Slides coming soon</span>
+    <!-- <span class="btn btn-primary paper-link-btn disabled" aria-disabled="true">Code coming soon</span> -->
+    <!-- <span class="btn btn-primary paper-link-btn disabled" aria-disabled="true">Slides coming soon</span> -->
   </div>
 </div>
 
-## Abstract
+## The Problem
 
-Accurate measurements of user engagement underpin important decisions in various settings, such as determining advertising fees based on viewership of online content, allocating public funding based on a clinic's reported patient volume, or determining whether a group chat app disseminated a message without censorship. While common, self-reporting is inherently untrustworthy due to misaligned incentives.
+Many important services are delivered by an intermediary, but the party paying for the service often has no trustworthy way to verify how many users were actually served. For example:
 
-Motivated by this problem, we introduce the notion of Verifiable Aggregate Receipts (VAR). A VAR system allows an issuer to issue receipts to users and to verify the number of receipts possessed by a prover, who is given receipts upon serving users. An ideal VAR system should satisfy inflation soundness, privacy, and performance at large scale.
+- In content economy platforms (e.g., social networks), a creator may pay for boosted views, but has little visibility into whether the promised number of views was actually delivered or simply self-reported.
+- In sponsored health programs, a provider may claim reimbursement for serving a certain number of patients, creating a direct incentive to inflate counts if there is no reliable auditing mechanism.
+- In BitTorrent-style reputation systems, an uploader may claim to have contributed more data than what really has been downloaded, distorting the incentives of the protocol.
 
-We formalize VAR using an ideal functionality and present two novel constructions: S-VAR, which uses bottom-up secret-sharing for tiered fuzzy audits, and P-VAR, which uses bilinear pairings for exact auditing with constant-time verification. We implement both and show practical performance for deployments involving one million users.
+Across these settings,
+a fundamental security problem is to verify service quality,
+e.g., how many eligible users were reached or how many
+employees were actually served.
 
-## The Story
+![](/figs/Duke%20Colloquium.026.png)
 
-The paper starts from a simple but stubborn problem: many important services are delivered by an intermediary, but the party paying for the service often has no trustworthy way to verify how many users were actually served. Platforms can over-report views, providers can inflate visit counts, and message delivery systems can make claims that are hard to audit after the fact.
+## Verifiable Aggregate Receipts (VAR)
 
-VAR is the paper's answer to that gap. Instead of asking everyone to trust a platform's dashboard, the system gives users receipts as they are served and lets the platform later prove only the aggregate count. That proof should be hard to fake, should not reveal which individual users were involved, and should still be practical at the scale of millions of users.
+VAR is the paper's answer to that gap. With VAR, a **platform** is given a *receipt* by users when they are served, and a verifier can cryptographic verify the number of receipts possessed by the platform through an interactive protocol.
 
-The figures make this especially concrete through a set of example applications:
+![Problem statement](/figs/Duke%20Colloquium.030.png)
 
-- In creator promotion, a creator can pay for boosted views on a platform, but has little visibility into whether the promised number of views was actually delivered or simply self-reported.
-- In government health programs, a provider may claim reimbursement for serving a certain number of patients, creating a direct incentive to inflate counts if there is no reliable auditing mechanism.
-- In BitTorrent-style reputation systems, an uploader may claim to have contributed more data than they really uploaded, distorting point systems and damaging the integrity of the protocol.
+That proof should be hard to fake (*inflation soundness*), should not reveal which individual users were involved (*privacy from verifier*), and should still be practical at the scale of millions of users.
 
-What ties these cases together is the same basic asymmetry: one party controls the service and the reporting, while another party must decide whether to trust a number. The website should make clear that VAR is meant to break that asymmetry by replacing unverifiable self-reporting with cryptographic evidence of aggregate service.
+- **Inflation soundness**: a prover should not be able to claim more engagement than it actually earned.
+- **Privacy**: the verifier should learn only the count, not individual identities beyond what can be inferred from the count.
+- **Deniability**: We don't like users to sign over their interactions with the platform because that violates "deniability" offered by most Internet applications.
+- **Scalability**: we aim to efficiently support *millions* of users.
 
-![Engagement auditing for content promotion](/figs/Duke%20Colloquium.027.png)
-![Government health programs](/figs/Duke%20Colloquium.028.png)
-![BitTorrent reputation systems](/figs/Duke%20Colloquium.029.png)
+For those familiar with anonymous credentials, the core of VAR can be viewed as an aggregatable form of one-show anonymous credentials, though our constructions do not directly build on anonymous credentials.
 
-![Problem statement](/figs/Duke%20Colloquium.032.png)
 
-## What Makes VAR Different
+### Two Constructions
 
-The core design target is not just correctness. It is the combination of three properties at once:
+The paper presents two complementary constructions.
 
-- Inflation soundness: a prover should not be able to claim more engagement than it actually earned.
-- Privacy: the verifier should learn the count, not the full set of identities behind the count.
-- Deniability and scale: the system should avoid turning user participation into transferable evidence, while remaining efficient enough for large deployments.
-
-That combination is what makes the problem interesting. A naive aggregate-signature approach can compress many user attestations, but it leaks too much and breaks deniability.
-
-![Aggregate signatures are not enough](/figs/Duke%20Colloquium.033.png)
-
-## Two Constructions
-
-The paper presents two complementary constructions rather than a single one-size-fits-all design.
-
-- `S-VAR` is the secret-sharing-based construction. Its strength is simplicity, strong theoretical footing, and tiered auditing. It is a good fit when fuzzy thresholds are acceptable and fast issuance matters.
+- `S-VAR` is the secret-sharing-based construction. Its strength is simplicity and efficiency in issuance; it is a good fit when fuzzy thresholds are acceptable and fast issuance matters.
 - `P-VAR` is the pairing-based construction. Its strength is exact auditing and faster proof generation, making it the stronger option when precise counts and fast audits are the priority.
 
-![Comparing the constructions](/figs/Duke%20Colloquium.036.png)
 
 The secret-sharing intuition is especially elegant: if reconstructing a secret requires enough shares, then successfully reconstructing it acts as evidence that the prover collected enough receipts.
 
 ![Secret-sharing intuition](/figs/Duke%20Colloquium.037.png)
 
-## A Concrete Application: Bluesky
+We refer readers to [the paper]() for details.
 
-One of the nicest aspects of the figures is that they turn the abstract protocol into a concrete application. In Bluesky, a creator may want to pay a feed generator to promote content, but still needs a way to verify that the promised delivery really happened.
+### Benchmark results
 
-The story unfolds in four steps:
-
-1. Users who opt into the protocol register public keys through a custom app view.
-2. A creator prepares a promotion task and issues encrypted receipts tied to those users.
-3. When a user actually sees the promoted content, the app view helps recover the user's receipt and returns it to the feed generator.
-4. Later, the feed generator proves the aggregate result to the creator, who audits the claim.
-
-![Bluesky motivation](/figs/z3.png)
-![Bluesky setup](/figs/z5.png)
-![Promotion task generation](/figs/z6.png)
-![View and spend](/figs/z7.png)
-![Prove and audit](/figs/z8.png)
-
-This is a strong storytelling example for the website because it shows that VAR is not just an abstract cryptographic primitive. It can be attached to a modern social-media pipeline without replacing the entire application stack.
-
-## Results
-
-The evaluation figures make the final point clearly: the proposed constructions are practical, and they significantly outperform baseline approaches for large-scale audits.
-
+The proposed constructions are practical, and they significantly outperform baseline approaches for large-scale audits.
 For one million users, the paper reports:
+
+**[Expand]**
 
 - less than 2 seconds for issuance in both schemes,
 - about 34 seconds for proving with the secret-sharing-based construction,
@@ -109,14 +83,52 @@ For one million users, the paper reports:
 
 ![Evaluation results](/figs/Duke%20Colloquium.043.png)
 
-The website story can therefore end on a clean message: verifiable user-engagement auditing is possible, it can preserve privacy better than obvious alternatives, and it is already efficient enough to matter in real systems.
+## A Concrete Application: TrueReach on Bluesky
+
+We extended the BlueSky protocol with a feature we call **TrueReach**, where a content creator can use VAR to cryptographically verify the view counts.
+
+### What is BlueSky, and why building VAR on it?
+
+[[translate this into text]]
+
+![Bluesky motivation](/figs/z2.png)
+
+### Our implementation strategy
+
+[How did we integrate with BlueSky, and why we did what we do]
+
+
+[An overview of steps]
+
+
+![Bluesky setup](/figs/z5.png)
+![Promotion task generation](/figs/z6.png)
+![View and spend](/figs/z7.png)
+![Prove and audit](/figs/z8.png)
+
+
+
+### Walk-through of a demo
+
+![](figs/clipboard_2026-03-13_14-13-51.png)
+
+![](figs/clipboard_2026-03-13_14-14-19.png)
+
+![](figs/clipboard_2026-03-13_14-14-26.png)
+
+![](figs/clipboard_2026-03-13_14-14-27.png)
+
+
 
 ## Highlights
 
 - Introduces Verifiable Aggregate Receipts for privacy-preserving user engagement auditing.
 - Presents two constructions: S-VAR for tiered fuzzy audits and P-VAR for exact audits.
-- Provides security proofs with respect to an ideal functionality.
-- Benchmarks both schemes at the scale of one million users.
+- TruPromo on BlueSky
+
+## Acknowledgements
+
+We thank Sen Yang for building TrueReach!
 
 ## Citation
 
