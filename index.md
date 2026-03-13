@@ -85,27 +85,56 @@ For one million users, the paper reports:
 
 ## A Concrete Application: TrueReach on Bluesky
 
-We extended the BlueSky protocol with a feature we call **TrueReach**, where a content creator can use VAR to cryptographically verify the view counts.
+We extended the Bluesky protocol with a feature we call **TrueReach**, where a content creator can use VAR to cryptographically verify the view counts.
 
-### What is BlueSky, and why building VAR on it?
+### What is Bluesky, and why building VAR on it?
 
-[[translate this into text]]
+Bluesky is a decentralized social network built on [AT Protocol](https://atproto.com/), which separates data hosting, content propagation, ranking, and presentation into independent components.
 
-![Bluesky motivation](/figs/z2.png)
+![Bluesky Overview](./figs/bluesky-overview.png)
+
+In AT Protocol, creators publish content to Personal Data Servers (PDSs), which store user data and posts. Relays then propagate updates from PDSs across the network so that downstream services can access new content. Based on these updates, feed generators apply ranking logic and produce customized feeds that users can subscribe to. Finally, app views retrieve ranked results from user-selected feeds and present them to users.
+
+Feed generators in AT Protocol act as recommendation algorithms: they select and rank content, and users can subscribe to different ranking services. This creates a promotion model in which creators may pay feed generators to increase content visibility. However, creators have no way to verify whether a feed generator actually delivered the promised exposure to users. **This lack of verifiability motivates applying the VAR protocol, which enables auditable proof that promoted content was delivered as agreed.**
+
 
 ### Our implementation strategy
 
-[How did we integrate with BlueSky, and why we did what we do]
+Our goal is to implement TrueReach so that the feed generator functions like a regular feed generator for general users, while providing verifiable views for content creators and users who join the protocol. The core of our implementation is a feed generator and a custom app view that support this functionality.
 
 
-[An overview of steps]
+#### 1: Setup
+
+When users join TrueReach, they generate a public/private key pair and send their public key together with their DID to the feed generator. The whole process is handled automatically by our custom app view.
+
+![TrueReach setup](/figs/TrueReach-Setup.png)
 
 
-![Bluesky setup](/figs/z5.png)
-![Promotion task generation](/figs/z6.png)
-![View and spend](/figs/z7.png)
-![Prove and audit](/figs/z8.png)
+#### 2. Promotion task generation
 
+When creators want to promote a post, they first fetch the public keys of users registered on the feed generator. The number of available public keys determines the maximum audience size for the promotion.
+
+They then follow the P-VAR protocol as the *verifier* to generate receipts and encrypt each receipt under the corresponding user public key. Because only the matching private key can decrypt a receipt, the feed generator cannot forge delivery evidence.
+
+![Generate Promotion Task on TrueReach](/figs/TrueReach-Task.png)
+
+#### 3. View and spend
+
+When users view the promoted post through the custom app view, the app view automatically fetches the corresponding encrypted receipt, decrypts it with the user's private key, and returns it to the feed generator.
+
+The feed generator receives the receipts and updates its state according to the P-VAR protocol.
+
+
+![Spend the Receipt](/figs/TrueReach-Spend.png)
+
+
+#### 4. Audit the proof
+
+When creators want the feed generator to *prove* that the reported number of views is correct, they follow the two-round interaction specified by the P-VAR protocol. First, creators request a commitment from the feed generator. This commitment fixes the feed generator's state before the seed is revealed, preventing it from adapting the proof afterward. The creator then reveals the seed, allowing the feed generator to generate a proof under the P-VAR protocol.
+
+Finally, creators can verify the correctness of the proof according to the P-VAR protocol. The audit process can also be handled automatically by the custom app view.
+
+![Audit the proof](/figs/TrueReach-Audit.png)
 
 
 ### Walk-through of a demo
@@ -124,7 +153,7 @@ We extended the BlueSky protocol with a feature we call **TrueReach**, where a c
 
 - Introduces Verifiable Aggregate Receipts for privacy-preserving user engagement auditing.
 - Presents two constructions: S-VAR for tiered fuzzy audits and P-VAR for exact audits.
-- TruPromo on BlueSky
+- TrueReach on Bluesky: verifiable promotion delivery for decentralized social media.
 
 ## Acknowledgements
 
