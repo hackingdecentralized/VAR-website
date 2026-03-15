@@ -27,16 +27,16 @@ subtitle: "with applications to privacy-preserving and scalable user engagement 
 
 ## The Problem
 
-Many important services are delivered by an intermediary, but the party paying for the service often has no trustworthy way to verify how many users were actually served. For example:
+Delegation is a common practice in modern economies: a delegator pays an intermediary to deliver services or information to end users.
+This spans from content creators relying on social media platforms to reach followers, to corporate outsourcing of employee benefits
+administration to external providers.
+However, the party paying for the service often has no trustworthy way to verify how many users were actually served. For example:
 
 - In content economy platforms (e.g., social networks), a creator may pay for boosted views, but has little visibility into whether the promised number of views was actually delivered or simply self-reported.
 - In sponsored health programs, a provider may claim reimbursement for serving a certain number of patients, creating a direct incentive to inflate counts if there is no reliable auditing mechanism.
-- In BitTorrent-style reputation systems, an uploader may claim to have contributed more data than what really has been downloaded, distorting the incentives of the protocol.
 
-Across these settings,
-a fundamental security problem is to verify service quality,
-e.g., how many eligible users were reached or how many
-employees were actually served.
+Across these settings, a fundamental security problem is to verify service quality,
+e.g., how many eligible users were reached or how many employees were actually served.
 
 ![](/figs/Duke%20Colloquium.026.png)
 
