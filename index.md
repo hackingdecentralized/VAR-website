@@ -48,8 +48,6 @@ However, the party *paying for the service* often has **no trustworthy way to ve
 
 **VAR** is the paper's answer to that gap. With VAR, a **platform** is given a *receipt* by users when they are served, and a **verifier** can cryptographically verify the number of receipts possessed by the platform through an interactive protocol.
 
-<!-- ![Problem statement](/figs/Duke%20Colloquium.030.png) -->
-
 That proof should be **hard to fake** (*inflation soundness*), should **not reveal which individual users were involved** (*privacy from verifier*), and should still be **practical at the scale of millions of users**.
 
 - **Inflation soundness**: a prover should not be able to claim more engagement than it actually earned.
@@ -171,6 +169,7 @@ You can try **TrueReach** through our app view at [bsky.hackingdecentralized.com
 ## Acknowledgements
 
 We thank Sen Yang for building TrueReach!
+We also thank Codex for assistance with website editing and presentation polish.
 
 ## Citation
 
