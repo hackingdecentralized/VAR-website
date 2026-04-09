@@ -28,3 +28,6 @@ paginate: 5
 
 site-css:
   - "/assets/css/custom.css"
+
+site-js:
+  - "/assets/js/custom.js"
